@@ -17,22 +17,36 @@ jobs:
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 拉取完整历史, 避免分叉时 pull 失败
 
       - name: 运行配置更新脚本 (PowerShell 跨平台)
         shell: pwsh
         run: |
           ./update.ps1
 
-      - name: 提交并推送更新
+      - name: 提交并推送更新 (带冲突处理)
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          if ! git diff --cached --quiet; then
-            echo "有配置更新，提交..."
-            git commit -m "chore: 自动同步代理配置 $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git push
-          else
-            echo "无配置变化，跳过提交"
+
+          if git diff --cached --quiet; then
+            echo "无配置变化, 跳过提交"
+            exit 0
           fi
+
+          echo "有配置更新, 提交..."
+          git commit -m "chore: 自动同步代理配置 $(date -u +'%Y-%m-%d %H:%M UTC')"
+
+          # 拉取远端最新并重放本地提交, 解决 "fetch first" 分叉冲突
+          echo "拉取远端最新..."
+          git pull --rebase || {
+            echo "自动整合失败, 尝试强推最新提交...";
+            git push --force-with-lease
+            exit 0
+          }
+
+          echo "推送..."
+          git push
