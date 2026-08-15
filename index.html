@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a1a2e">
+<title>BSY 代理配置中心</title>
+<meta name="description" content="免费代理配置自动同步下载站 — 每日自动更新,手机/电脑均可下载">
+<style>
+  :root{
+    --bg:#f5f5f7;
+    --card:#ffffff;
+    --ink:#1a1a2e;
+    --sub:#6b6b7b;
+    --line:#e4e4ea;
+    --accent:#2563eb;
+    --accent-dark:#1e40af;
+    --ok:#16a34a;
+    --warn:#d97706;
+    --radius:14px;
+    --shadow:0 1px 3px rgba(26,26,46,.06),0 8px 24px rgba(26,26,46,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:16px 16px 60px}
+
+  /* ===== 头部 ===== */
+  header{
+    text-align:center;padding:34px 12px 6px;
+  }
+  .logo{
+    width:72px;height:72px;border-radius:18px;
+    background:#fff;box-shadow:var(--shadow);
+    display:inline-flex;align-items:center;justify-content:center;
+    overflow:hidden;margin-bottom:14px;
+  }
+  .logo img{width:64px;height:64px;object-fit:contain}
+  h1{font-size:24px;font-weight:700;letter-spacing:.5px}
+  .tagline{color:var(--sub);font-size:14px;margin-top:6px}
+  .status-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:14px;padding:7px 16px;border-radius:999px;
+    background:#ecfdf5;color:var(--ok);font-size:13px;font-weight:600;
+    border:1px solid #bbf7d0;
+  }
+  .status-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* ===== 提示卡 ===== */
+  .notice{
+    margin-top:22px;padding:14px 16px;border-radius:var(--radius);
+    background:#fffbeb;border:1px solid #fde68a;color:#92400e;
+    font-size:13.5px;
+  }
+  .notice b{color:#78350f}
+  .notice code{background:#fef3c7;padding:1px 6px;border-radius:5px;font-size:12px}
+
+  /* ===== 区块标题 ===== */
+  .section-title{
+    display:flex;align-items:center;justify-content:space-between;
+    margin:30px 4px 12px;
+  }
+  .section-title h2{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .section-title h2::before{
+    content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:var(--accent);
+  }
+  .updated{
+    font-size:12px;color:var(--sub);font-weight:500;
+  }
+
+  /* ===== 配置卡片 ===== */
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:10px;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(26,26,46,.1)}
+  .card-head{display:flex;align-items:center;gap:12px}
+  .k-icon{
+    width:42px;height:42px;border-radius:11px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;
+  }
+  .card-title{font-size:15.5px;font-weight:700}
+  .card-sub{font-size:12.5px;color:var(--sub)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:6px;background:#eef2ff;color:var(--accent-dark);font-weight:600}
+  .btn{
+    margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 14px;border-radius:10px;background:var(--accent);color:#fff;
+    font-size:14px;font-weight:600;text-decoration:none;border:none;cursor:pointer;
+    transition:background .2s;
+  }
+  .btn:hover{background:var(--accent-dark)}
+  .btn:active{transform:scale(.97)}
+  .btn .arr{font-size:16px;line-height:1}
+
+  /* ===== 全量下载 ===== */
+  .all-dl{margin-top:22px}
+  .all-dl .btn{width:100%;padding:15px;font-size:16px;border-radius:12px}
+  .all-dl .btn.dark{background:var(--ink)}
+  .all-dl .btn.dark:hover{background:#000}
+  .all-sub{text-align:center;font-size:12px;color:var(--sub);margin-top:8px}
+
+  /* ===== 使用说明 ===== */
+  .steps{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px;margin-top:10px;
+  }
+  .step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step-num{
+    width:28px;height:28px;border-radius:50%;flex-shrink:0;
+    background:#eef2ff;color:var(--accent);font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step-body{font-size:13.5px}
+  .step-body b{display:block;font-size:14px;margin-bottom:2px}
+  .step-body code{background:#f1f1f4;padding:1px 6px;border-radius:5px;font-size:12px}
+
+  /* ===== 页脚 ===== */
+  footer{
+    text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
+    color:var(--sub);font-size:12.5px;
+  }
+  footer .foot-brand{font-size:13px;color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 头部 -->
+  <header>
+    <div class="logo"><img src="https://bsywqx.github.io/logo.png" alt="BSY LOGO"></div>
+    <h1>BSY 代理配置中心</h1>
+    <p class="tagline">免费代理 · 自动同步 · 多端可用</p>
+    <div class="status-badge"><span class="dot"></span>配置每日自动更新</div>
+  </header>
+
+  <!-- 提示 -->
+  <div class="notice">
+    ⚠️ 本页所有配置为<b>免费共享节点</b>，仅供学习与技术研究，请遵守所在地法律法规。节点不稳定属正常现象，若全部失效请等待自动更新。
+  </div>
+
+  <!-- 配置列表 -->
+  <div class="section-title">
+    <h2>可用配置</h2>
+    <span class="updated" id="updTime">更新时间：—</span>
+  </div>
+
+  <div class="grid" id="grid"><!-- 由 JS 填充 --></div>
+
+  <!-- 全量下载 -->
+  <div class="all-dl">
+    <a class="btn dark" id="allZip" href="javascript:void(0)"><span class="arr">⬇</span> 下载全部配置 (.zip)</a>
+    <p class="all-sub">一次性打包 6 个内核的最新配置</p>
+  </div>
+
+  <!-- 使用说明 -->
+  <div class="section-title"><h2>使用说明</h2></div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><b>选择你的客户端</b>按设备选择合适的代理客户端（Clash / sing-box / Hysteria2 等）</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><b>下载对应配置</b>点击上方卡片下载对应内核的配置文件</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><b>导入客户端</b>将下载的文件导入客户端的「配置文件」并切换启用</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><b>连接代理</b>开启系统代理 / TUN 模式，即可访问国际网络</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-brand">BSY 代理配置中心</div>
+    <div>© <span id="year"></span> Masud · 免费共享 · 每日自动更新</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // 配置文件清单：文件名 + 显示名 + 说明 + 颜色
+  var ITEMS = [
+    {file:'clash.meta_config.yaml', name:'Clash Meta', icon:'CM', desc:'Windows/Android 通用', tag:'热门', color:'#2563eb'},
+    {file:'Xray_config.json',      name:'Xray',       icon:'XR', desc:'vless+reality',      tag:'高速', color:'#7c3aed'},
+    {file:'hysteria_config.json',  name:'Hysteria',   icon:'HY', desc:'Hysteria v1 (UDP)',  tag:'抗封锁', color:'#059669'},
+    {file:'hysteria2_config.json', name:'Hysteria2',  icon:'H2', desc:'Hysteria2 (UDP)',    tag:'推荐', color:'#0d9488'},
+    {file:'singbox_config.json',   name:'sing-box',   icon:'SB', desc:'多协议聚合',         tag:'全能', color:'#d97706'},
+    {file:'naiveproxy_config.json',name:'NaiveProxy', icon:'NP', desc:'NaiveProxy (HTTP2)', tag:'稳定', color:'#dc2626'}
+  ];
+  var grid = document.getElementById('grid');
+  ITEMS.forEach(function(it){
+    var href = 'config/' + encodeURIComponent(it.file);
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<div class="k-icon" style="background:'+it.color+'">'+it.icon+'</div>' +
+        '<div><div class="card-title">'+it.name+'</div><div class="card-sub">'+it.desc+'</div></div>' +
+      '</div>' +
+      '<div class="meta-row"><span class="tag">'+it.tag+'</span><span class="tag">'+it.file.split('.')[1]+'</span></div>' +
+      '<a class="btn" href="'+href+'" download><span class="arr">⬇</span> 下载配置</a>';
+    grid.appendChild(card);
+  });
+
+  // 更新时间：读仓库内 config/.last_update
+  var upd = document.getElementById('updTime');
+  fetch('config/.last_update?'+Date.now()).then(function(r){return r.text();}).then(function(t){
+    t = (t||'').trim();
+    if(t) upd.textContent = '更新时间：' + t;
+  }).catch(function(){/* 忽略 */});
+
+  // 全量下载：用 JS 生成 zip 太依赖库，这里提供逐个下载的替代（或指向 config 列表）
+  // 简单实现：点击后依次下载所有配置
+  document.getElementById('allZip').addEventListener('click', function(){
+    ITEMS.forEach(function(it, i){
+      setTimeout(function(){
+        var a = document.createElement('a');
+        a.href = 'config/' + encodeURIComponent(it.file);
+        a.download = it.file;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, i * 600);
+    });
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
